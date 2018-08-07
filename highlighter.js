@@ -1,5 +1,22 @@
 'use strict';
 
+const TAG_LIST = [
+  "P",
+  "A",
+  "B",
+  "I",
+  "STRONG",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "LI",
+  "TD",
+  "SPAN",
+];
+
 function search(text, queries) {
   let spans = [];
   for (let i = 0; i < text.length; i++) {
@@ -51,15 +68,18 @@ function replaceTextWithSpans(textNode, spans) {
   parentNode.removeChild(textNode);
 }
 
+let queries = ["for", "in"];
+
 let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
 while (iter.nextNode()) {
   let node = iter.referenceNode;
-  let text = node.textContent;
-  let queries = ["for", "in"];
+  if (TAG_LIST.includes(node.parentNode.tagName)) {
+    let text = node.textContent;
 
-  let spans = search(text, queries);
-  if (spans.length > 0) {
-    replaceTextWithSpans(node, spans);
+    let spans = search(text, queries);
+    if (spans.length > 0) {
+      replaceTextWithSpans(node, spans);
+    }
   }
 }
 
