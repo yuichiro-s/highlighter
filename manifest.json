@@ -31,7 +31,7 @@
     "128": "images/get_started128.png"
   },
   "commands": {
-    "add-selected-phrase": {
+    "toggle-selected-phrase": {
       "suggested_key": {
         "default": "Ctrl+Shift+A"
       },

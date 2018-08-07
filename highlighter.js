@@ -6,6 +6,7 @@ const TAG_LIST = [
   "B",
   "I",
   "STRONG",
+  "EM",
   "H1",
   "H2",
   "H3",
@@ -18,7 +19,7 @@ const TAG_LIST = [
   "DIV",
 ];
 
-var queries = [ "ation", "因为" ];
+var queries = new Set([ "ation", "因为" ]);
 
 function search(text, queries) {
   let spans = [];
@@ -31,6 +32,19 @@ function search(text, queries) {
     }
   }
   return spans;
+}
+
+let currentSpanNode = null;
+
+function mouseEnterListener(event) {
+  let x = event.clientX;
+  let y = event.clientY;
+  let element = document.elementFromPoint(x, y);
+  currentSpanNode = element;
+}
+
+function mouseLeaveListener(event) {
+  currentSpanNode = null;
 }
 
 function replaceTextWithSpans(textNode, spans) {
@@ -53,6 +67,8 @@ function replaceTextWithSpans(textNode, spans) {
       insertText(cursor, begin);
     }
     let spanNode = document.createElement("span");
+    spanNode.addEventListener("mouseenter", mouseEnterListener);
+    spanNode.addEventListener("mouseleave", mouseLeaveListener);
     spanNode.classList.add("highlighted");
     spanNode.textContent = text.substring(begin, end);
     insert(spanNode);
@@ -86,19 +102,42 @@ function highlightMatches() {
   document.body.normalize();
 }
 
-function addPhrase(phrase) { queries.push(phrase); }
+function unhighlight(phrase) {
+  var elements = document.getElementsByClassName("highlighted");
+  let i = elements.length;
+  while (i--) {
+    let element = elements[i];
+    if (element.textContent === phrase) {
+      let parentNode = element.parentNode;
+      let newNode = document.createTextNode(phrase);
+      parentNode.insertBefore(newNode, element);
+      parentNode.removeChild(element);
+    }
+  }
+  document.body.normalize();
+}
 
-function addSelectedPhrase() {
-  let text = window.getSelection().toString();
-  if (text.length > 0) {
-    addPhrase(text);
-    highlightMatches();
+function addPhrase(phrase) { queries.add(phrase); }
+function removePhrase(phrase) { queries.delete(phrase); }
+
+function toggleSelectedPhrase() {
+  if (currentSpanNode === null) {
+    let text = window.getSelection().toString();
+    if (text.length > 0) {
+      addPhrase(text);
+      highlightMatches();
+    }
+  } else {
+    let text = currentSpanNode.textContent;
+    removePhrase(text);
+    unhighlight(text);
+    currentSpanNode = null;
   }
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request === "add-selected-phrase") {
-    addSelectedPhrase();
+  if (request === "toggle-selected-phrase") {
+    toggleSelectedPhrase();
   }
 });
 
