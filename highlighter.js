@@ -15,6 +15,7 @@ const TAG_LIST = [
   "LI",
   "TD",
   "SPAN",
+  "DIV",
 ];
 
 var queries = [ "ation", "因为" ];
@@ -85,15 +86,20 @@ function highlightMatches() {
   document.body.normalize();
 }
 
-function addPhrase(phrase, url, context) { queries.push(phrase); }
+function addPhrase(phrase) { queries.push(phrase); }
 
 function addSelectedPhrase() {
   let text = window.getSelection().toString();
   if (text.length > 0) {
-    console.log();
     addPhrase(text);
     highlightMatches();
   }
 }
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request === "add-selected-phrase") {
+    addSelectedPhrase();
+  }
+});
 
 highlightMatches();
