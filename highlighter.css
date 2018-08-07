@@ -1,3 +1,7 @@
 span.highlighted {
   background-color: red;
 }
+
+span.highlighted:hover {
+    background-color: pink;
+}
