@@ -1,17 +1,26 @@
 'use strict';
 
-function search(text, queries) {
+function load_phrases(callback) {
+
+}
+
+function search(text, phrases) {
   let spans = [];
   for (let i = 0; i < text.length; i++) {
-    for (const query of queries) {
-      let len = query.length;
-      if (query === text.substring(i, i + len)) {
-        spans.push([ query, i, i + len ]);
+    for (const phrase of phrases) {
+      let len = phrase.length;
+      if (phrase === text.substring(i, i + len)) {
+        spans.push([ phrase, i, i + len ]);
       }
     }
   }
   return spans;
 }
 
-function addPhrase(phrase) { queries.add(phrase); }
-function removePhrase(phrase) { queries.delete(phrase); }
+function addPhrase(phrases, phrase) { phrases.push(phrase); }
+function removePhrase(phrases, phrase) {
+  let index = phrases.indexOf(phrase);
+  if (index > -1) {
+    phrases.splice(index, 1);
+  }
+}

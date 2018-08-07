@@ -1,5 +1,6 @@
 'use strict';
 
+// tags to search for phrases
 const TAG_LIST = [
   "P",
   "A",
@@ -19,8 +20,6 @@ const TAG_LIST = [
   "DIV",
 ];
 
-var queries = new Set([ "ation", "因为" ]);
-
 let currentSpanNode = null;
 
 function mouseEnterListener(event) {
@@ -30,9 +29,7 @@ function mouseEnterListener(event) {
   currentSpanNode = element;
 }
 
-function mouseLeaveListener(event) {
-  currentSpanNode = null;
-}
+function mouseLeaveListener(event) { currentSpanNode = null; }
 
 function replaceTextWithSpans(textNode, spans) {
   let parentNode = textNode.parentNode;
@@ -72,7 +69,7 @@ function replaceTextWithSpans(textNode, spans) {
   parentNode.removeChild(textNode);
 }
 
-function highlightMatches() {
+function highlight(phrases) {
   let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
   while (iter.nextNode()) {
     let node = iter.referenceNode;
@@ -80,13 +77,13 @@ function highlightMatches() {
         !node.parentNode.classList.contains("highlighted")) {
       let text = node.textContent;
 
-      let spans = search(text, queries);
+      let spans = search(text, phrases);
       if (spans.length > 0) {
         replaceTextWithSpans(node, spans);
       }
+      document.body.normalize();
     }
   }
-  document.body.normalize();
 }
 
 function unhighlight(phrase) {
@@ -108,15 +105,28 @@ function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
     let text = window.getSelection().toString();
     if (text.length > 0) {
-      addPhrase(text);
-      highlightMatches();
+      load_phrases(function(phrases) {
+        addPhrase(phrases, text);
+        highlight(phrases);
+        save_phrases(phrases);
+      });
     }
   } else {
     let text = currentSpanNode.textContent;
-    removePhrase(text);
-    unhighlight(text);
-    currentSpanNode = null;
+    load_phrases(function(phrases) {
+      removePhrase(phrases, text);
+      currentSpanNode = null;
+      unhighlight(text);
+      save_phrases(phrases);
+    });
   }
+}
+
+function save_phrases(phrases) { chrome.storage.sync.set({phrases}); }
+
+function load_phrases(callback) {
+  chrome.storage.sync.get([ 'phrases' ],
+                          function(data) { callback(data.phrases); });
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -125,4 +135,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
-highlightMatches();
+load_phrases(highlight);
