@@ -17,13 +17,15 @@ const TAG_LIST = [
   "SPAN",
 ];
 
+var queries = [ "ation", "因为" ];
+
 function search(text, queries) {
   let spans = [];
   for (let i = 0; i < text.length; i++) {
     for (const query of queries) {
       let len = query.length;
       if (query === text.substring(i, i + len)) {
-        spans.push([query, i, i + len]);
+        spans.push([ query, i, i + len ]);
       }
     }
   }
@@ -34,9 +36,7 @@ function replaceTextWithSpans(textNode, spans) {
   let parentNode = textNode.parentNode;
   let text = textNode.textContent;
 
-  function insert(newNode) {
-    parentNode.insertBefore(newNode, textNode);
-  }
+  function insert(newNode) { parentNode.insertBefore(newNode, textNode); }
 
   function insertText(begin, end) {
     let s = text.substring(begin, end);
@@ -68,19 +68,32 @@ function replaceTextWithSpans(textNode, spans) {
   parentNode.removeChild(textNode);
 }
 
-let queries = ["for", "in"];
+function highlightMatches() {
+  let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
+  while (iter.nextNode()) {
+    let node = iter.referenceNode;
+    if (TAG_LIST.includes(node.parentNode.tagName) &&
+        !node.parentNode.classList.contains("highlighted")) {
+      let text = node.textContent;
 
-let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
-while (iter.nextNode()) {
-  let node = iter.referenceNode;
-  if (TAG_LIST.includes(node.parentNode.tagName)) {
-    let text = node.textContent;
-
-    let spans = search(text, queries);
-    if (spans.length > 0) {
-      replaceTextWithSpans(node, spans);
+      let spans = search(text, queries);
+      if (spans.length > 0) {
+        replaceTextWithSpans(node, spans);
+      }
     }
+  }
+  document.body.normalize();
+}
+
+function addPhrase(phrase, url, context) { queries.push(phrase); }
+
+function addSelectedPhrase() {
+  let text = window.getSelection().toString();
+  if (text.length > 0) {
+    console.log();
+    addPhrase(text);
+    highlightMatches();
   }
 }
 
-document.body.normalize()
+highlightMatches();
