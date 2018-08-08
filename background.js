@@ -1,7 +1,7 @@
 'use strict';
 
 chrome.runtime.onInstalled.addListener(function(details) {
-  chrome.storage.sync.set({phrases: []});
+  chrome.storage.sync.set({phrases: {}});
 });
 
 // pass command to active tab

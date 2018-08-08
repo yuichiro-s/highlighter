@@ -2,22 +2,8 @@
 
 // tags to search for phrases
 const TAG_LIST = [
-  "P",
-  "A",
-  "B",
-  "I",
-  "STRONG",
-  "EM",
-  "H1",
-  "H2",
-  "H3",
-  "H4",
-  "H5",
-  "H6",
-  "LI",
-  "TD",
-  "SPAN",
-  "DIV",
+  "P", "A", "B", "I", "STRONG", "EM", "H1", "H2", "H3", "H4", "H5", "H6", "LI",
+  "TD", "SPAN", "DIV"
 ];
 
 let currentSpanNode = null;
@@ -62,38 +48,38 @@ function replaceTextWithSpans(textNode, spans) {
     insertText(cursor, text.length);
   }
 
-  console.log(parentNode.tagName);
-  console.log(text);
-  console.log(spans);
-
   parentNode.removeChild(textNode);
 }
 
 function highlight(phrases) {
+  // unhighlight all first
+  unhighlight(null);
+
   let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
   while (iter.nextNode()) {
     let node = iter.referenceNode;
-    if (TAG_LIST.includes(node.parentNode.tagName) &&
-        !node.parentNode.classList.contains("highlighted")) {
+    if (TAG_LIST.includes(node.parentNode.tagName)) {
       let text = node.textContent;
 
       let spans = search(text, phrases);
       if (spans.length > 0) {
         replaceTextWithSpans(node, spans);
       }
-      document.body.normalize();
     }
   }
+  document.body.normalize();
 }
 
 function unhighlight(phrase) {
+  // unhighlight all if phrase is null
   var elements = document.getElementsByClassName("highlighted");
   let i = elements.length;
   while (i--) {
     let element = elements[i];
-    if (element.textContent === phrase) {
+    if (phrase === null || element.textContent === phrase) {
       let parentNode = element.parentNode;
-      let newNode = document.createTextNode(phrase);
+      let text = element.textContent;
+      let newNode = document.createTextNode(text);
       parentNode.insertBefore(newNode, element);
       parentNode.removeChild(element);
     }
