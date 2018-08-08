@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["matcher.js", "highlighter.js"],
+      "js": ["letters.js", "matcher.js", "highlighter.js"],
       "css": ["highlighter.css"]
     }
   ],

@@ -1,7 +1,23 @@
 'use strict';
 
-function normalize(text) {
-  return text.trim().toLowerCase();
+function normalize(text) { return text.trim().toLowerCase(); }
+
+function isAlphaNumeric(p) {
+  if (0x30 <= p && p <= 0x39) {
+    //  number
+    return true;
+  }
+  return LETTERS.has(p);
+}
+
+function isInsideWord(text, pos) {
+  if (pos == 0) {
+    return false;
+  }
+
+  // check consecutive alphanumeric characters
+  return isAlphaNumeric(text.codePointAt(pos)) &&
+         isAlphaNumeric(text.codePointAt(pos - 1));
 }
 
 function search(text, phrases) {
@@ -11,11 +27,14 @@ function search(text, phrases) {
 
   while (start < text.length) {
     let node = phrases;
-    // TODO: word boundary check
-    let lastMatch = 0;
+    if (isInsideWord(text, start)) {
+      // do not start matching in the middle of a word
+      start++;
+      continue;
+    }
 
     let cursor = start;
-
+    let lastMatch = 0;
     while (cursor < text.length) {
       const p = text.codePointAt(cursor);
       if (!(p in node)) {
@@ -24,13 +43,17 @@ function search(text, phrases) {
       node = node[p];
       cursor++;
       if (node.end) {
-        lastMatch = cursor;
+        if (cursor == text.length ||
+            !isAlphaNumeric(text.codePointAt(cursor))) {
+          // not in the middle of a word
+          lastMatch = cursor;
+        }
       }
     }
 
     if (lastMatch > 0) {
-      const phrase = text.substring(start, lastMatch);  // this is normalized
-      spans.push([phrase, start, lastMatch]);
+      const phrase = text.substring(start, lastMatch); // this is normalized
+      spans.push([ phrase, start, lastMatch ]);
       start = lastMatch;
     } else {
       start++;
@@ -42,21 +65,21 @@ function search(text, phrases) {
 
 function addPhrase(phrases, phrase) {
   phrase = normalize(phrase);
-
-  let node = phrases;
-  for (let i = 0; i < phrase.length; i++) {
-    const p = phrase.codePointAt(i);
-    if (!(p in node)) {
-      node[p] = {};
+  if (phrase.length > 0) {
+    let node = phrases;
+    for (let i = 0; i < phrase.length; i++) {
+      const p = phrase.codePointAt(i);
+      if (!(p in node)) {
+        node[p] = {};
+      }
+      node = node[p];
+      node.end = node.end || (i === phrase.length - 1);
     }
-    node = node[p];
-    node.end = node.end || (i === phrase.length-1);
   }
+  console.log("Added: " + phrase);
 }
 
-function isEmptyNode(node) {
-  return Object.keys(node).length === 1;
-}
+function isEmptyNode(node) { return Object.keys(node).length === 1; }
 
 function removePhrase(phrases, phrase) {
   phrase = normalize(phrase);
@@ -67,7 +90,7 @@ function removePhrase(phrases, phrase) {
       return isEmptyNode(node);
     } else {
       const p = phrase.codePointAt(i);
-      if (dfs(node[p], i+1)) {
+      if (dfs(node[p], i + 1)) {
         delete node[p];
         return isEmptyNode(node) && !node.end;
       } else {
@@ -76,4 +99,5 @@ function removePhrase(phrases, phrase) {
     }
   }
   dfs(phrases, 0);
+  console.log("Removed: " + phrase);
 }

@@ -81,10 +81,39 @@ function highlight(phrases) {
   document.body.normalize();
 }
 
+function isSelectingWord() {
+  const selection = window.getSelection();
+  if (selection.rangeCount == 0) {
+    return false;
+  }
+  const range = selection.getRangeAt(0);
+  if (range.startContainer !== range.endContainer ||
+      range.startContainer.nodeType !== Node.TEXT_NODE) {
+    return false;
+  }
+  const text = range.startContainer.textContent;
+
+  const start = range.startOffset;
+  if (isAlphaNumeric(text.codePointAt(start)) && start > 0 &&
+      isAlphaNumeric(text.codePointAt(start - 1))) {
+    // consecutive alphanumeric characters
+    return false;
+  }
+
+  const end = range.endOffset;
+  if (isAlphaNumeric(text.codePointAt(end - 1)) && end < text.length &&
+      isAlphaNumeric(text.codePointAt(end))) {
+    // consecutive alphanumeric characters
+    return false;
+  }
+
+  return true;
+}
+
 function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
-    let text = window.getSelection().toString();
-    if (text.length > 0) {
+    if (isSelectingWord()) {
+      let text = window.getSelection().toString();
       load_phrases(function(phrases) {
         addPhrase(phrases, text);
         highlight(phrases);
