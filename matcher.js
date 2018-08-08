@@ -1,8 +1,13 @@
 'use strict';
 
+function normalize(text) {
+  return text.trim().toLowerCase();
+}
+
 function search(text, phrases) {
   let spans = [];
   let start = 0;
+  text = text.toLowerCase();
 
   while (start < text.length) {
     let node = phrases;
@@ -24,7 +29,7 @@ function search(text, phrases) {
     }
 
     if (lastMatch > 0) {
-      const phrase = text.substring(start, lastMatch);
+      const phrase = text.substring(start, lastMatch);  // this is normalized
       spans.push([phrase, start, lastMatch]);
       start = lastMatch;
     } else {
@@ -36,6 +41,8 @@ function search(text, phrases) {
 }
 
 function addPhrase(phrases, phrase) {
+  phrase = normalize(phrase);
+
   let node = phrases;
   for (let i = 0; i < phrase.length; i++) {
     const p = phrase.codePointAt(i);
@@ -52,6 +59,8 @@ function isEmptyNode(node) {
 }
 
 function removePhrase(phrases, phrase) {
+  phrase = normalize(phrase);
+
   const length = phrase.length;
   function dfs(node, i) {
     if (i >= length) {

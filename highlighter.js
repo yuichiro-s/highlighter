@@ -31,6 +31,7 @@ function replaceTextWithSpans(textNode, spans) {
 
   let cursor = 0;
   for (const span of spans) {
+    let phrase = span[0];
     let begin = span[1];
     let end = span[2];
     if (cursor < begin) {
@@ -40,6 +41,7 @@ function replaceTextWithSpans(textNode, spans) {
     spanNode.addEventListener("mouseenter", mouseEnterListener);
     spanNode.addEventListener("mouseleave", mouseLeaveListener);
     spanNode.classList.add("highlighted");
+    spanNode.setAttribute("data-phrase", phrase);
     spanNode.textContent = text.substring(begin, end);
     insert(spanNode);
     cursor = end;
@@ -53,7 +55,16 @@ function replaceTextWithSpans(textNode, spans) {
 
 function highlight(phrases) {
   // unhighlight all first
-  unhighlight(null);
+  var elements = document.getElementsByClassName("highlighted");
+  let i = elements.length;
+  while (i--) {
+    let element = elements[i];
+    let parentNode = element.parentNode;
+    let text = element.textContent;
+    let newNode = document.createTextNode(text);
+    parentNode.insertBefore(newNode, element);
+    parentNode.removeChild(element);
+  }
 
   let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
   while (iter.nextNode()) {
@@ -70,23 +81,6 @@ function highlight(phrases) {
   document.body.normalize();
 }
 
-function unhighlight(phrase) {
-  // unhighlight all if phrase is null
-  var elements = document.getElementsByClassName("highlighted");
-  let i = elements.length;
-  while (i--) {
-    let element = elements[i];
-    if (phrase === null || element.textContent === phrase) {
-      let parentNode = element.parentNode;
-      let text = element.textContent;
-      let newNode = document.createTextNode(text);
-      parentNode.insertBefore(newNode, element);
-      parentNode.removeChild(element);
-    }
-  }
-  document.body.normalize();
-}
-
 function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
     let text = window.getSelection().toString();
@@ -98,11 +92,11 @@ function toggleSelectedPhrase() {
       });
     }
   } else {
-    let text = currentSpanNode.textContent;
+    let phrase = currentSpanNode.getAttribute("data-phrase");
     load_phrases(function(phrases) {
-      removePhrase(phrases, text);
+      removePhrase(phrases, phrase);
       currentSpanNode = null;
-      unhighlight(text);
+      highlight(phrases);
       save_phrases(phrases);
     });
   }
