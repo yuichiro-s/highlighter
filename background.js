@@ -1,8 +1,6 @@
 'use strict';
 
-chrome.runtime.onInstalled.addListener(function(details) {
-  initPhrases();
-});
+chrome.runtime.onInstalled.addListener(function(details) { initPhrases(); });
 
 // pass command to active tab
 chrome.commands.onCommand.addListener(function(command) {

@@ -33,7 +33,8 @@ function search(text, phrases) {
       node = node[p];
       cursor++;
       if (node.end) {
-        isPartial = isPartial || (cursor < text.length && isInsideWord(text, cursor));
+        isPartial =
+            isPartial || (cursor < text.length && isInsideWord(text, cursor));
         lastMatch = cursor;
       }
     }
@@ -98,7 +99,7 @@ function listPhrases(phrases) {
     for (const p in node) {
       if (p !== "end") {
         const c = String.fromCodePoint(p);
-        dfs(node[p], prefix + [c]);
+        dfs(node[p], prefix + [ c ]);
       }
     }
   }
