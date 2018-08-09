@@ -3,10 +3,6 @@
 function normalize(text) { return text.trim().toLowerCase(); }
 
 function isAlphaNumeric(p) {
-  if (0x30 <= p && p <= 0x39) {
-    //  number
-    return true;
-  }
   return LETTERS.has(p);
 }
 
