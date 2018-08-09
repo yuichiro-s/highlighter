@@ -2,10 +2,10 @@
   "name": "Highlighter",
   "version": "0.1",
   "description": "Highlights matching phrases.",
-  "permissions": ["activeTab", "declarativeContent", "storage"],
+  "permissions": ["activeTab", "declarativeContent", "storage", "unlimitedStorage"],
   "options_page": "options.html",
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["letters.js", "matcher.js", "background.js"],
     "persistent": false
   },
   "content_scripts": [

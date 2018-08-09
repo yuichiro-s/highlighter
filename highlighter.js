@@ -91,27 +91,20 @@ function highlight(phrases) {
 function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
     let text = window.getSelection().toString();
-    load_phrases(function(phrases) {
+    loadPhrases(function(phrases) {
       addPhrase(phrases, text);
       highlight(phrases);
-      save_phrases(phrases);
+      savePhrases(phrases);
     });
   } else {
     let phrase = currentSpanNode.getAttribute("data-phrase");
-    load_phrases(function(phrases) {
+    loadPhrases(function(phrases) {
       removePhrase(phrases, phrase);
       currentSpanNode = null;
       highlight(phrases);
-      save_phrases(phrases);
+      savePhrases(phrases);
     });
   }
-}
-
-function save_phrases(phrases) { chrome.storage.sync.set({phrases}); }
-
-function load_phrases(callback) {
-  chrome.storage.sync.get([ 'phrases' ],
-                          function(data) { callback(data.phrases); });
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -120,4 +113,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
-load_phrases(highlight);
+loadPhrases(highlight);

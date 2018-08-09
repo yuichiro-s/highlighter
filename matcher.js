@@ -2,9 +2,7 @@
 
 function normalize(text) { return text.trim().toLowerCase(); }
 
-function isAlphaNumeric(p) {
-  return LETTERS.has(p);
-}
+function isAlphaNumeric(p) { return LETTERS.has(p); }
 
 function isInsideWord(text, pos) {
   if (pos == 0) {
@@ -91,3 +89,29 @@ function removePhrase(phrases, phrase) {
   dfs(phrases, 0);
   console.log("Removed: " + phrase);
 }
+
+function listPhrases(phrases) {
+  let phraseList = [];
+  function dfs(node, prefix) {
+    if (node.end) {
+      phraseList.push(prefix);
+    }
+    for (const p in node) {
+      if (p !== "end") {
+        const c = String.fromCodePoint(p);
+        dfs(node[p], prefix + [c]);
+      }
+    }
+  }
+  dfs(phrases, []);
+  return phraseList;
+}
+
+function savePhrases(phrases) { chrome.storage.local.set({phrases}); }
+
+function loadPhrases(callback) {
+  chrome.storage.local.get([ 'phrases' ],
+                           function(data) { callback(data.phrases); });
+}
+
+function initPhrases() { chrome.storage.local.set({phrases : {}}); }

@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
-      button {
-        height: 30px;
-        width: 30px;
-        outline: none;
-        margin: 10px;
-      }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.min.css">
   </head>
   <body>
+    <input type="file" id="fileElem" style="display:none">
+    <a href="#" download="wordlist.txt" id="downloadLink" style="display:none"></a>
+
+    <div class="container">
+      <div class="row">
+        <div class="column">
+          <button id="exportButton" type="button">Export word list</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <button id="importButton" type="button">Import word list</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <button id="clearButton" type="button">Clear word list</button>
+        </div>
+      </div>
+    </div>
   </body>
+  <script src="matcher.js"></script>
   <script src="options.js"></script>
 </html>
