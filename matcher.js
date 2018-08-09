@@ -33,8 +33,7 @@ function search(text, phrases) {
       node = node[p];
       cursor++;
       if (node.end) {
-        isPartial = isPartial || (cursor < text.length &&
-                                  isAlphaNumeric(text.codePointAt(cursor)));
+        isPartial = isPartial || (cursor < text.length && isInsideWord(text, cursor));
         lastMatch = cursor;
       }
     }
