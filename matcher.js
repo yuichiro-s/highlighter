@@ -1,5 +1,7 @@
 'use strict';
 
+const MAX_PHRASE_LENGTH = 50;
+
 function normalize(text) { return text.trim().toLowerCase(); }
 
 function isAlphaNumeric(p) { return LETTERS.has(p); }
@@ -53,7 +55,7 @@ function search(text, phrases) {
 
 function addPhrase(phrases, phrase) {
   phrase = normalize(phrase);
-  if (phrase.length > 0) {
+  if (0 < phrase.length && phrase.length <= MAX_PHRASE_LENGTH) {
     let node = phrases;
     for (let i = 0; i < phrase.length; i++) {
       const p = phrase.codePointAt(i);
@@ -75,6 +77,7 @@ function removePhrase(phrases, phrase) {
   const length = phrase.length;
   function dfs(node, i) {
     if (i >= length) {
+      node.end = false;
       return isEmptyNode(node);
     } else {
       const p = phrase.codePointAt(i);
