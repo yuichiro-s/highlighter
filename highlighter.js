@@ -3,7 +3,7 @@
 // tags to search for phrases
 const TAG_LIST = [
   "P", "A", "B", "I", "STRONG", "EM", "H1", "H2", "H3", "H4", "H5", "H6", "LI",
-  "TD", "SPAN", "DIV"
+  "TD", "SPAN", "DIV", "BLOCKQUOTE"
 ];
 
 let currentSpanNode = null;
@@ -31,9 +31,10 @@ function replaceTextWithSpans(textNode, spans) {
 
   let cursor = 0;
   for (const span of spans) {
-    let phrase = span[0];
-    let begin = span[1];
-    let end = span[2];
+    let begin = span[0];
+    let end = span[1];
+    let phrase = span[2];
+    let isPartial = span[3];
     if (cursor < begin) {
       insertText(cursor, begin);
     }
@@ -41,6 +42,11 @@ function replaceTextWithSpans(textNode, spans) {
     spanNode.addEventListener("mouseenter", mouseEnterListener);
     spanNode.addEventListener("mouseleave", mouseLeaveListener);
     spanNode.classList.add("highlighted");
+    if (isPartial) {
+      spanNode.classList.add("partial-match");
+    } else {
+      spanNode.classList.add("full-match");
+    }
     spanNode.setAttribute("data-phrase", phrase);
     spanNode.textContent = text.substring(begin, end);
     insert(spanNode);
@@ -65,6 +71,7 @@ function highlight(phrases) {
     parentNode.insertBefore(newNode, element);
     parentNode.removeChild(element);
   }
+  document.body.normalize();
 
   let iter = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
   while (iter.nextNode()) {
@@ -81,45 +88,14 @@ function highlight(phrases) {
   document.body.normalize();
 }
 
-function isSelectingWord() {
-  const selection = window.getSelection();
-  if (selection.rangeCount == 0) {
-    return false;
-  }
-  const range = selection.getRangeAt(0);
-  if (range.startContainer !== range.endContainer ||
-      range.startContainer.nodeType !== Node.TEXT_NODE) {
-    return false;
-  }
-  const text = range.startContainer.textContent;
-
-  const start = range.startOffset;
-  if (isAlphaNumeric(text.codePointAt(start)) && start > 0 &&
-      isAlphaNumeric(text.codePointAt(start - 1))) {
-    // consecutive alphanumeric characters
-    return false;
-  }
-
-  const end = range.endOffset;
-  if (isAlphaNumeric(text.codePointAt(end - 1)) && end < text.length &&
-      isAlphaNumeric(text.codePointAt(end))) {
-    // consecutive alphanumeric characters
-    return false;
-  }
-
-  return true;
-}
-
 function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
-    if (isSelectingWord()) {
-      let text = window.getSelection().toString();
-      load_phrases(function(phrases) {
-        addPhrase(phrases, text);
-        highlight(phrases);
-        save_phrases(phrases);
-      });
-    }
+    let text = window.getSelection().toString();
+    load_phrases(function(phrases) {
+      addPhrase(phrases, text);
+      highlight(phrases);
+      save_phrases(phrases);
+    });
   } else {
     let phrase = currentSpanNode.getAttribute("data-phrase");
     load_phrases(function(phrases) {

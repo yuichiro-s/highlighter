@@ -27,14 +27,10 @@ function search(text, phrases) {
 
   while (start < text.length) {
     let node = phrases;
-    if (isInsideWord(text, start)) {
-      // do not start matching in the middle of a word
-      start++;
-      continue;
-    }
 
     let cursor = start;
     let lastMatch = 0;
+    let isPartial = isInsideWord(text, start);
     while (cursor < text.length) {
       const p = text.codePointAt(cursor);
       if (!(p in node)) {
@@ -43,17 +39,15 @@ function search(text, phrases) {
       node = node[p];
       cursor++;
       if (node.end) {
-        if (cursor == text.length ||
-            !isAlphaNumeric(text.codePointAt(cursor))) {
-          // not in the middle of a word
-          lastMatch = cursor;
-        }
+        isPartial = isPartial || (cursor < text.length &&
+                                  isAlphaNumeric(text.codePointAt(cursor)));
+        lastMatch = cursor;
       }
     }
 
     if (lastMatch > 0) {
       const phrase = text.substring(start, lastMatch); // this is normalized
-      spans.push([ phrase, start, lastMatch ]);
+      spans.push([ start, lastMatch, phrase, isPartial ]);
       start = lastMatch;
     } else {
       start++;
@@ -75,8 +69,8 @@ function addPhrase(phrases, phrase) {
       node = node[p];
       node.end = node.end || (i === phrase.length - 1);
     }
+    console.log("Added: " + phrase);
   }
-  console.log("Added: " + phrase);
 }
 
 function isEmptyNode(node) { return Object.keys(node).length === 1; }

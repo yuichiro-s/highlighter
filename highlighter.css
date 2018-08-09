@@ -1,9 +1,16 @@
 span.highlighted {
-  background-color: red;
   margin-left:1px;
   margin-right:1px;
 }
 
+span.full-match {
+  background-color: red;
+}
+
+span.partial-match {
+  background-color: orange;
+}
+
 span.highlighted:hover {
-    background-color: pink;
+  filter: contrast(50%) brightness(150%);
 }
