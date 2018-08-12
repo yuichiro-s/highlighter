@@ -3,7 +3,7 @@
 // tags to search for phrases
 const TAG_LIST = [
   "P", "A", "B", "I", "STRONG", "EM", "H1", "H2", "H3", "H4", "H5", "H6", "LI",
-  "TD", "SPAN", "DIV", "BLOCKQUOTE"
+  "TD", "DD", "SPAN", "DIV", "BLOCKQUOTE"
 ];
 
 let currentSpanNode = null;
