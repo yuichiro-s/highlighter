@@ -29,10 +29,10 @@ function search(text, phrases) {
     let isPartial = isInsideWord(text, start);
     while (cursor < text.length) {
       const p = text.codePointAt(cursor);
-      if (!(p in node)) {
+      if (!(p in node.next)) {
         break;
       }
-      node = node[p];
+      node = node.next[p];
       cursor++;
       if (node.end) {
         isPartial =
@@ -53,23 +53,32 @@ function search(text, phrases) {
   return spans;
 }
 
-function addPhrase(phrases, phrase) {
+function addPhrase(phrases, phrase, time) {
   phrase = normalize(phrase);
   if (0 < phrase.length && phrase.length <= MAX_PHRASE_LENGTH) {
     let node = phrases;
     for (let i = 0; i < phrase.length; i++) {
       const p = phrase.codePointAt(i);
-      if (!(p in node)) {
-        node[p] = {};
+      if (!(p in node.next)) {
+        node.next[p] = {
+          next: {},
+          end: false,
+          time: null,
+        };
       }
-      node = node[p];
-      node.end = node.end || (i === phrase.length - 1);
+      node = node.next[p];
+      if (i === phrase.length - 1) {
+        node.end = true;
+        node.time = time || Date.now();
+      }
     }
     console.log("Added: " + phrase);
   }
 }
 
-function isEmptyNode(node) { return Object.keys(node).length === 1; }
+function isEmptyNode(node) {
+  return Object.keys(node.next).length === 0;
+}
 
 function removePhrase(phrases, phrase) {
   phrase = normalize(phrase);
@@ -78,11 +87,12 @@ function removePhrase(phrases, phrase) {
   function dfs(node, i) {
     if (i >= length) {
       node.end = false;
+      node.time = null;
       return isEmptyNode(node);
     } else {
       const p = phrase.codePointAt(i);
-      if (dfs(node[p], i + 1)) {
-        delete node[p];
+      if (dfs(node.next[p], i + 1)) {
+        delete node.next[p];
         return isEmptyNode(node) && !node.end;
       } else {
         return false;
@@ -97,13 +107,11 @@ function listPhrases(phrases) {
   let phraseList = [];
   function dfs(node, prefix) {
     if (node.end) {
-      phraseList.push(prefix);
+      phraseList.push([prefix, node.time]);
     }
-    for (const p in node) {
-      if (p !== "end") {
-        const c = String.fromCodePoint(p);
-        dfs(node[p], prefix + [ c ]);
-      }
+    for (const p in node.next) {
+      const c = String.fromCodePoint(p);
+      dfs(node.next[p], prefix + [ c ]);
     }
   }
   dfs(phrases, []);
@@ -117,4 +125,8 @@ function loadPhrases(callback) {
                            function(data) { callback(data.phrases); });
 }
 
-function initPhrases() { chrome.storage.local.set({phrases : {}}); }
+function initPhrases() { chrome.storage.local.set({phrases : {
+  next: {},
+  end: false,
+  time: null,
+}}); }
