@@ -1,6 +1,6 @@
 'use strict';
 
-function exportPhrases() {
+function exportPhrasesCommand() {
   loadPhrases(function(phrases) {
     let phraseList = listPhrases(phrases);
     let lines = [];
@@ -9,15 +9,14 @@ function exportPhrases() {
       lines.push(line);
     }
     const str = lines.join('\n') + '\n';
-    const data =
-        'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
+    const data = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
     let downloadLink = document.getElementById("downloadLink");
     downloadLink.setAttribute("href", data);
     downloadLink.click();
   });
 }
 
-function importPhrases() {
+function importPhrasesCommand() {
   let fileElem = document.getElementById("fileElem");
   fileElem.click();
 }
@@ -56,16 +55,37 @@ function handleFiles(evt) {
   }
 }
 
-function clearPhrases() {
+function clearPhrasesCommand() {
   if (confirm(
           "Are you sure you want to clear the word list? This cannot be undone.")) {
     initPhrases();
   }
 }
 
+function listPhrasesCommand() {
+  loadPhrases(function(phrases) {
+    let phraseList = listPhrases(phrases);
+    let yesterday = Date.now() - 1000 * 60 * 60 * 24;
+    let node = document.getElementById("wordList");
+    node.innerHTML = "";
+    for (let list of phraseList) {
+      let phrase = list[0];
+      let time = list[1];
+      if (yesterday <= time) {
+        let li = document.createElement("li");
+        li.appendChild(document.createTextNode(phrase));
+        node.appendChild(li);
+      }
+    }
+  });
+}
+
 document.getElementById("fileElem").addEventListener("change", handleFiles);
 document.getElementById("exportButton")
-    .addEventListener("click", exportPhrases);
+    .addEventListener("click", exportPhrasesCommand);
 document.getElementById("importButton")
-    .addEventListener("click", importPhrases);
-document.getElementById("clearButton").addEventListener("click", clearPhrases);
+    .addEventListener("click", importPhrasesCommand);
+document.getElementById("clearButton")
+    .addEventListener("click", clearPhrasesCommand);
+document.getElementById("listButton")
+    .addEventListener("click", listPhrasesCommand);
