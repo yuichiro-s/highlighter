@@ -4,13 +4,13 @@ span.highlighted {
 }
 
 span.full-match {
-  background-color: red;
+  background-color: #8888ff;
 }
 
 span.partial-match {
-  background-color: orange;
+  background-color: #bb88ff;
 }
 
 span.highlighted:hover {
-  filter: contrast(50%) brightness(150%);
+  filter: contrast(70%) brightness(130%);
 }
