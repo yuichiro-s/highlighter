@@ -88,9 +88,15 @@ function highlight(phrases) {
   document.body.normalize();
 }
 
+function getSelectedText() {
+  let selection = window.getSelection();
+  let text = selection.toString() || selection.anchorNode.textContent;
+  return text;
+}
+
 function toggleSelectedPhrase() {
   if (currentSpanNode === null) {
-    let text = window.getSelection().toString();
+    let text = getSelectedText();
     loadPhrases(function(phrases) {
       addPhrase(phrases, text);
       highlight(phrases);
